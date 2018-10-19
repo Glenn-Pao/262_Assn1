@@ -1,2 +1,16 @@
 ﻿  RainbowTables.cpp
-  RainbowTable.vcxproj -> D:\CSCI262\Assignments\A1\RainbowTable\Debug\RainbowTable.exe
+c:\users\admin\desktop\262_assn1\rainbowtable\rainbowtables.cpp(82): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+c:\users\admin\desktop\262_assn1\rainbowtable\rainbowtables.cpp(88): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+c:\users\admin\desktop\262_assn1\rainbowtable\rainbowtables.cpp(92): warning C4018: '<': signed/unsigned mismatch
+c:\users\admin\desktop\262_assn1\rainbowtable\rainbowtables.cpp(256): warning C4018: '<': signed/unsigned mismatch
+c:\users\admin\desktop\262_assn1\rainbowtable\rainbowtables.cpp(259): warning C4018: '<': signed/unsigned mismatch
+c:\users\admin\desktop\262_assn1\rainbowtable\rainbowtables.cpp(299): warning C4018: '<': signed/unsigned mismatch
+c:\users\admin\desktop\262_assn1\rainbowtable\rainbowtables.cpp(340): warning C4018: '<': signed/unsigned mismatch
+c:\users\admin\desktop\262_assn1\rainbowtable\rainbowtables.cpp(372): warning C4018: '<': signed/unsigned mismatch
+c:\users\admin\desktop\262_assn1\rainbowtable\rainbowtables.cpp(401): warning C4018: '<': signed/unsigned mismatch
+c:\users\admin\desktop\262_assn1\rainbowtable\rainbowtables.cpp(441): warning C4018: '<': signed/unsigned mismatch
+c:\users\admin\desktop\262_assn1\rainbowtable\rainbowtables.cpp(464): warning C4018: '<': signed/unsigned mismatch
+c:\users\admin\desktop\262_assn1\rainbowtable\rainbowtables.cpp(97): warning C4715: 'RainbowTables::searchUnusedPassword': not all control paths return a value
+c:\users\admin\desktop\262_assn1\rainbowtable\rainbowtables.cpp(389): warning C4715: 'RainbowTables::calcStartingIndexPos': not all control paths return a value
+c:\users\admin\desktop\262_assn1\rainbowtable\rainbowtables.cpp(508): warning C4715: 'RainbowTables::searchPasswordFromChain': not all control paths return a value
+  RainbowTable.vcxproj -> C:\Users\Admin\Desktop\262_assn1\Debug\RainbowTable.exe

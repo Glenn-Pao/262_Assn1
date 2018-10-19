@@ -15,8 +15,6 @@
 class RainbowTables
 {
 private:
-	int columns;			//column
-	int rows;				//row
 	string chars;			//the characters
 	int reductionBitLen;		//the password length
 	int reductionCharLen;
@@ -39,25 +37,26 @@ private:
 	int calcReductionBin(string hashVal);
 	int calcReductionPwdNum(int val);
 	int calcPwdLineNum(int val);
+	int calcStartingIndexPos(string hashVal);
+	int convertStringIntoInt(string theString);
+	string convertCharIntoString(char theChar);
 
+	void sortChainHashes();
+	void writeRainbowTextFile();
+	void appendRainbowTextFile(string thePwd, string theHash);
 
 	//initialize table
 	void init(const string& fileName, const string& rainbowTableName);
 
-	string reduction(const string& hash, int column) const;
-	string createHashChain(string password) const;
-	string getLastHash(const string& startHash, int startCol) const;
-	string findHashInsideChain(const string& startingPassword, const string& startingHash) const;
 	void replaceString(string& theString, const string& from, const string& to);
+	string convertToLowerCase(string theString);
+	bool verifyHashInput(string theInput);
+	vector<int> calcListOfPossibleChains(string theInput);
+	string searchPasswordFromChain(string matchingHash, vector<int> vecPossibleChain);
 public:
-	RainbowTables(int col, int row, string const& fileName, string const& rainbowTableName);
+	RainbowTables(string const& fileName, string const& rainbowTableName);
 	~RainbowTables();
-
-	void writeFile(const string& fileNmae) const;
-	void readFile(const string& fileName);
-
 	string hashTargetWord(const string& pwd) const;
-	string checkPassword(const string& theHash) const;
-	string testHashReduce(const string& testWord) const;
+	void main();
 };
 #endif // !RAINBOWTABLE_H
