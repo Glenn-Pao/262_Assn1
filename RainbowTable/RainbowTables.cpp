@@ -7,30 +7,23 @@
 #include <omp.h>		//using OpenMP for parallelism
 #include <sstream>
 #include <bitset>
-#include "TableConfig.h"	
 #include "MD5Hashing.h"
 using namespace std;
-static const char CONSTCA_HASHCHAR[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+static const char HASHCHARS[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
-static int N_HEXAPOSITION[16];
+static int HEXAPOS[16];
 
-const static char CONST_C_RAINBOWTABLEDELIMETER = ':';
-const static int CONST_N_NUMOFCHARFORHASH = 32;					//Const static int to contain the number of characters for md5 hash
+const static char DELIMITER = ':';
+const static int NUMHASH = 32;					//Const static int to contain the number of characters for md5 hash
 RainbowTables::RainbowTables(string const& fileName, string const& rainbowTableName)
 {
 	//establish the MD5 Hashing and ALL possible alphanumeric characters
 	theHash = new MD5Hashing();
-	chars = "a-zA-Z0-9";
-	replaceString(chars, "a-z", LettersLower);
-	replaceString(chars, "A-Z", LettersUpper);
-	replaceString(chars, "0-9", Digits);
-	theTable = TableConfig();
 	init(fileName, rainbowTableName);
 }
 RainbowTables::~RainbowTables()
 {
 	delete theHash;
-	theTable.freeMem();
 }
 void RainbowTables::initRainbowTable(const string& rainbowTableName)
 {
@@ -83,12 +76,14 @@ void RainbowTables::setBitLen()
 }
 void RainbowTables::setCharLen()
 {
+	//this was assuming the bit length is only 4. it's not the case but let's just work with this
 	double numChars = (double)reductionBitLen / 4.0;
 
 	reductionCharLen = ceil(numChars);
 }
 int RainbowTables::searchUnusedPassword()
 {
+	//find all unused passwords
 	for (int i = 0; i < thePasswords.size(); i++)
 	{
 		if (!thePasswords[i].getUsedState())
@@ -97,14 +92,11 @@ int RainbowTables::searchUnusedPassword()
 }
 int RainbowTables::convertStringIntoInt(string theString)
 {
-	//Declare string stream to convert string into int
 	stringstream ss;
-	//Store string into stringstream variable
 	ss << theString;
 
 	//Declare int to return
 	int theInt;
-	//Store converted string into int
 	ss >> theInt;
 
 	//Return int
@@ -112,14 +104,11 @@ int RainbowTables::convertStringIntoInt(string theString)
 }
 string RainbowTables::convertCharIntoString(char theChar)
 {
-	//Declare string stream to convert char into string
 	stringstream ss;
-	//Store char into stringstream variable
 	ss << theChar;
 
 	//Declare string to return
 	string theString;
-	//Store converted char into int
 	ss >> theString;
 
 	//Return string
@@ -129,24 +118,18 @@ string RainbowTables::convertCharIntoString(char theChar)
 int RainbowTables::calcReductionBin(string hashVal)
 {
 	string bin;
-	/*unsigned char* bytes = new unsigned char[16];
-	int temp;*/
 	for (int i = 0; i < reductionCharLen; i++)
 	{
-		/*sscanf(hashVal.c_str() + 2 * i, "%2x", &temp);
-		bytes[i] = temp;*/
-		//Declare string stream to convert character into a hexadecimal character
 		stringstream ss;
 		ss << hex << hashVal[i];
 		//Assign hexa charaacter into a unsigned int
 		unsigned n;
 		ss >> n;
-		//Convert int into binary
-		bitset<4> b(n);
-		//Append binary value to that of the string
+		//change int into binary
+		bitset<12> b(n);
+		//append to a string
 		bin = (string)bin + (string)b.to_string();
 	}
-	cout << bin << endl;
 	//get the bits needed
 	string bitsNeeded;
 
@@ -157,26 +140,26 @@ int RainbowTables::calcReductionBin(string hashVal)
 
 	//convert into int
 	int n_bin = convertStringIntoInt(bitsNeeded);
-	cout << "bits needed: " << n_bin << endl;
+	//cout << "bits needed: " << n_bin << endl;
 	return n_bin;
 }
 int RainbowTables::calcReductionPwdNum(int val)
 {
-	int n_binaryNumber = val;
+	int binNum = val;
 
-	int n_dec = 0;
-	long l_rem = 0;
-	long l_base = 1;
+	int decimal = 0;
+	long remainder = 0;
+	long base = 1;
 
-	while (n_binaryNumber > 0)
+	while (binNum > 0)
 	{
-		l_rem = n_binaryNumber % 10;
-		n_dec = n_dec + l_rem * l_base;
-		l_base = l_base * 2;
-		n_binaryNumber = n_binaryNumber / 10;
+		remainder = binNum % 10;
+		decimal = decimal + remainder * base;
+		base = base * 2;
+		binNum = binNum / 10;
 	}
 
-	return n_dec;
+	return decimal;
 }
 int RainbowTables::calcPwdLineNum(int val)
 {
@@ -250,11 +233,10 @@ void RainbowTables::createTheHashChain()
 }
 void RainbowTables::sortChainHashes()
 {
-	//Standard bubble sort
-
-	//Traverse through the chains that exist
+	//Standard bubble sort - do you really want to sort this out?
 	for (int i = 0; i < theChains.size(); i++)
 	{
+		//cout << "Sorting " << theChains[i].getChainStartPassword() << endl;
 		//Traverse through the chains that exist minus one
 		for (int a = 0; a < theChains.size() - 1; a++)
 		{
@@ -273,49 +255,28 @@ void RainbowTables::sortChainHashes()
 void RainbowTables::appendRainbowTextFile(string thePwd, string theHash)
 {
 	//Declare ofstream to write into rainbow text file
-	ofstream ofs_rainbowFile;
+	ofstream rainbowFile;
 	//Declare string to append password and hash to rainbow.txt
-	string s_chain;
+	string chain;
 
 	//Attach rainbow.txt character delimeter to the end of chain starting password
-	string s_rainbowDelimeter = convertCharIntoString(CONST_C_RAINBOWTABLEDELIMETER);
-	s_chain = (string)thePwd + (string)s_rainbowDelimeter + (string)theHash;
+	string rainbowDelimeter = convertCharIntoString(DELIMITER);
+	chain = (string)thePwd + (string)rainbowDelimeter + (string)theHash;
+
+	//just to check that it is doing what it is supposed to be doing, 
+	//cout << s_chain << endl;
 
 	//Open new text file & append to it (Create if it does not exist)
-	ofs_rainbowFile.open("Rainbow.txt", ios::app);
+	rainbowFile.open("Rainbow.txt", ios::app);
 	//Append content into file
-	ofs_rainbowFile << s_chain << endl;
+	rainbowFile << chain << endl;
 	//Close new text file
-	ofs_rainbowFile.close();
+	rainbowFile.close();
 }
 void RainbowTables::writeRainbowTextFile()
 {
-	//Declare an int to indicate the current hexa character (0 by default)
-	int n_hexaChar = 0;
-	//Set the first character hexa mark to be 0
-	N_HEXAPOSITION[n_hexaChar] = 0;
-
-	//Traverse through the number of chain
 	for (int i = 0; i < theChains.size(); i++)
 	{
-		//Check if the first character is not equal to that of the hexa char
-		if (theChains[i].getChainLastHash()[0] != CONSTCA_HASHCHAR[n_hexaChar])
-		{
-			//Traverse through the hexa character list
-			for (int a = 0; a < 16; a++)
-			{
-				//Check if which character the hexa character is for the hash
-				if (theChains[i].getChainLastHash()[0] == CONSTCA_HASHCHAR[a])
-				{
-					//Set the current hexa char to be that
-					n_hexaChar = a;
-					//Mark the position in N_HEXAPOSITION
-					N_HEXAPOSITION[n_hexaChar] = i;
-					//Break out of loop
-					break;
-				}
-			}
-		}
 		//Append chain to rainbow.txt
 		appendRainbowTextFile(theChains[i].getChainStartPassword(), theChains[i].getChainLastHash());
 	}
@@ -329,24 +290,22 @@ bool RainbowTables::verifyHashInput(string theInput)
 		return true;
 	}
 	//Check if it contains 32 character
-	else if (theInput.length() != CONST_N_NUMOFCHARFORHASH)
+	else if (theInput.length() != NUMHASH)
 	{
 		//Print error message
 		cout << "Hash value does not contain 32 characters" << endl;
 		return false;
 	}
 
-	//Traverse through string and check if it contains any characters aside from those allowed
 	for (int i = 0; i < theInput.length(); i++)
 	{
-		//Declare bool to state if character is valid (False by default)
 		bool validChar = false;
 
 		//Traverse through list of allowed characters
 		for (int a = 0; a < 16; a++)
 		{
 			//Check if character is equal to the character
-			if (theInput[i] == CONSTCA_HASHCHAR[a])
+			if (theInput[i] == HASHCHARS[a])
 			{
 				//Set valid char to be true
 				validChar = true;
@@ -355,9 +314,8 @@ bool RainbowTables::verifyHashInput(string theInput)
 		}
 
 		//Check if char is invalid
-		if (validChar != true)
+		if (!validChar)
 		{
-			//Print error message
 			cout << "Error, hash value contains invalid hexa characters" << endl;
 			return false;
 		}
@@ -371,7 +329,6 @@ string RainbowTables::convertToLowerCase(string theString)
 	//change to lower case
 	for (int i = 0; i < theString.length(); i++)
 	{
-		//Convert to lower
 		theString[i] = tolower(theString[i]);
 	}
 	return theString;
@@ -381,43 +338,40 @@ int RainbowTables::calcStartingIndexPos(string hashVal)
 	//search for the starting point
 	for (int i = 0; i < 16; i++)
 	{
-		if (hashVal[0] == CONSTCA_HASHCHAR[i])
+		if (hashVal[0] == HASHCHARS[i])
 		{
-			return N_HEXAPOSITION[i];
+			return HEXAPOS[i];
 		}
 	}
 }
 vector<int> RainbowTables::calcListOfPossibleChains(string theInput)
 {
-	//Declare vector to store list of possible chavoid addChainToRainbowTableList(string _sChainPassword, string _sChainHash)in
+	//the temp vector of possible chains
 	vector<int> possibleChains;
-	//Bool to state if hash value is found at end of chains (False by default)
-	bool b_hashValueAtEnd = false;
+	//flag to check if hash is found
+	bool found = false;
 
-	//Declare int to indicate starting index for searching
+	//make a starting point
 	int startIndex = calcStartingIndexPos(theInput);
 
-	//Traverse through the rainbow table & check if any of the hashes matches the chain last hash
+	//Search through the vector
 	for (int a = startIndex; a < theChains.size(); a++)
 	{
-		//If hash value matches
 		if (theInput == theChains[a].getChainLastHash())
 		{
 			//Push back into list of possible chains
 			possibleChains.push_back(a);
 			//Set bool of hash value found at end of chains to be true
-			b_hashValueAtEnd = true;
+			found = true;
 		}
 	}
 
-	//If hash at end of chains is true
-	if (b_hashValueAtEnd == true)
+	if (found)
 	{
 		//Return vector of possible lines
 		return possibleChains;
 	}
 
-	//Declare string to store the password
 	string pwd;
 	//Set password to store the hash value initially
 	pwd = theInput;
@@ -437,7 +391,7 @@ vector<int> RainbowTables::calcListOfPossibleChains(string theInput)
 		//Set int to indicate starting index for searching
 		startIndex = calcStartingIndexPos(pwd);
 
-		//Traverse through the rainbow table & check if any of the hashes matches the chain last hash
+		//reduce the chances of collisions
 		for (int a = startIndex; a < theChains.size(); a++)
 		{
 			//If hash value matches
@@ -448,16 +402,14 @@ vector<int> RainbowTables::calcListOfPossibleChains(string theInput)
 			}
 		}
 	}
-	//Return vector of possible lines
 	return possibleChains;
 }
 string RainbowTables::searchPasswordFromChain(string matchingHash, vector<int> vecPossibleChain)
 {
-	//Declare string to hold the last reduced password
 	string reducedPassword;
-	//Declare string to hold the last hashed password
 	string hashed;
-	//Declare string to state if the password has been found (False by default)
+
+	//did you find the password inside the chain?
 	bool found = false;
 
 	//Traverse through list of possible chains
@@ -466,7 +418,8 @@ string RainbowTables::searchPasswordFromChain(string matchingHash, vector<int> v
 		//Set reduced password to be the chain starting password
 		reducedPassword = theChains[vecPossibleChain[i]].getChainStartPassword();
 
-		cout << "Reduced password: " << reducedPassword << endl;
+		//check that it is correct
+		//cout << "Reduced password: " << reducedPassword << endl;
 
 		//Hash and reduce 5 times
 		for (int a = 0; a < 5; a++)
@@ -501,14 +454,14 @@ string RainbowTables::searchPasswordFromChain(string matchingHash, vector<int> v
 	}
 
 	//If password not found
-	if (found == false)
+	if (!found)
 	{
 		return "Invalid hash value";
 	}
 }
 void RainbowTables::main()
 {
-	while (1)
+	while (true)
 	{
 		//Prompt user for user input
 		cout << "Enter a hash value to get password or '0' to quit program." << endl;
@@ -562,34 +515,14 @@ void RainbowTables::init(const string& fileName, const string& rainbowTableName)
 		createTheHashChain();
 	}
 
-	//sort the chains
-	sortChainHashes();
+	//sort the chains..it took way too long so i commented it out
+	//sortChainHashes();
 
 	writeRainbowTextFile();
 
 	cout << "Complete setup" << endl;
 }
-void hexconversion(const char *text, unsigned char* bytes)
-{
-	//implementation is MD5
-	int temp;
-	for (int i = 0; i < 16; i++)
-	{
-		sscanf(text + 2 * i, "%2x", &temp);
-		bytes[i] = temp;
-	}
-}
 string RainbowTables::hashTargetWord(const string& pwd) const
 {
 	return theHash->hash(pwd);
-}
-void RainbowTables::replaceString(string& theString, const string& from, const string& to)
-{
-	// Find string <from>.
-	size_t start_pos = theString.find(from);
-	if (start_pos != std::string::npos)
-	{
-		// If found, replace sequence to <to>.
-		theString.replace(start_pos, from.length(), to);
-	}
 }

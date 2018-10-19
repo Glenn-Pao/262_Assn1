@@ -124,7 +124,6 @@
     <ClCompile Include="MD5Hashing.cpp" />
     <ClCompile Include="Password.cpp" />
     <ClCompile Include="RainbowTables.cpp" />
-    <ClCompile Include="TableConfig.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HashChain.h" />
@@ -134,7 +133,6 @@
     <ClInclude Include="MD5Hashing.h" />
     <ClInclude Include="Password.h" />
     <ClInclude Include="RainbowTables.h" />
-    <ClInclude Include="TableConfig.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
